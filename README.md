@@ -71,6 +71,11 @@ docs/
   analisis-proyecto-y-arquitectura.md
 .github/
   copilot-instructions.md
+  skills/
+    commit-messages/
+      SKILL.md
+    versionado-semantico/
+      SKILL.md
 ```
 
 Consulta el [análisis del proyecto y la arquitectura](docs/analisis-proyecto-y-arquitectura.md) y las [instrucciones de Copilot](.github/copilot-instructions.md) para conocer el alcance y los criterios del MVP. La captura visual usada como referencia durante el desarrollo no se distribuye en este repositorio; el análisis conserva su descripción textual.

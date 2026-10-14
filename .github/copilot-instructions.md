@@ -33,6 +33,10 @@
 - No incluyas claves secretas en el cliente ni en el repositorio. Si un proveedor futuro requiere una clave, usa un backend o función serverless y almacénala en el servidor.
 - Incluye un crédito visible y enlazado a Open-Meteo. Revisa límites, licencia y condiciones de uso antes de publicar, especialmente para uso comercial.
 
+## Versionado y commits
+
+- Cuando se preparen cambios de la aplicación para un commit, invoca primero y como etapa independiente el [skill de versionado semántico](skills/versionado-semantico/SKILL.md). Solo después de que termine, invoca el skill de mensajes de commit si hace falta redactar el mensaje; no lo invoques antes ni hagas el versionado como parte de ese skill.
+
 ## Validación
 
 - Antes de cambiar código, inspecciona la estructura, dependencias y pruebas existentes; sigue sus convenciones y no inventes comandos de build o test.
