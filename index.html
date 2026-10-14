@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <meta name="theme-color" content="#f7f8f6">
+    <meta name="description" content="Consulta el tiempo actual y la previsión de siete días para cualquier ciudad.">
+    <title>Cielo local — previsión del tiempo</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="./styles.css">
+    <script type="module" src="./src/app.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Saltar al contenido</a>
+    <div class="page-shell">
+      <header class="site-header">
+        <a class="brand" href="#top" aria-label="Cielo local, inicio">
+          <span class="brand__mark" aria-hidden="true">
+            <svg viewBox="0 0 48 48">
+              <circle cx="24" cy="24" r="20" fill="#eaf5f6"></circle>
+              <path d="M14 27a8 8 0 0 1 15.4-3.1A6.4 6.4 0 1 1 31 36H15a4.5 4.5 0 0 1-1-9Z" fill="#fff" stroke="#78a6ad" stroke-width="1.5"></path>
+              <circle cx="30" cy="17" r="5" fill="#f5bf55"></circle>
+            </svg>
+          </span>
+          <span class="brand__wordmark">cielo <strong>local</strong></span>
+        </a>
+        <p class="site-header__note"><span aria-hidden="true"></span> Un vistazo al cielo de cualquier ciudad</p>
+      </header>
+
+      <main id="main-content" class="main-content">
+        <section id="top" class="search-intro" aria-labelledby="page-title">
+          <p class="eyebrow"><span aria-hidden="true"></span> PREVISIÓN LOCAL</p>
+          <h1 id="page-title">El tiempo de tu ciudad,<br class="wide-break"> claro y al momento.</h1>
+          <p class="search-intro__copy">Busca un lugar y descubre qué te espera ahí fuera.</p>
+
+          <form id="search-form" class="search-form" novalidate>
+            <label for="city-input">¿Qué ciudad quieres consultar?</label>
+            <div class="search-form__row">
+              <div class="search-field">
+                <svg class="search-field__icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="10.8" cy="10.8" r="6.3"></circle>
+                  <path d="m15.5 15.5 4.2 4.2"></path>
+                </svg>
+                <input
+                  id="city-input"
+                  name="city"
+                  type="search"
+                  placeholder="Ej. Madrid o Madrid, España"
+                  autocomplete="off"
+                  maxlength="120"
+                  aria-describedby="city-help"
+                  required
+                >
+              </div>
+              <button id="search-button" class="search-button" type="submit">
+                <span id="search-button-label">Buscar</span>
+                <svg class="search-button__icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M5 12h13M13 6l6 6-6 6"></path>
+                </svg>
+                <span id="search-spinner" class="search-spinner" aria-hidden="true" hidden></span>
+              </button>
+            </div>
+            <p id="city-help" class="field-hint">Escribe al menos dos caracteres. Añadir el país ayuda a distinguir ciudades con el mismo nombre.</p>
+          </form>
+        </section>
+
+        <p id="app-status" class="app-status" role="status" aria-live="polite" aria-atomic="true" hidden></p>
+
+        <section id="location-picker" class="location-picker" aria-labelledby="location-heading" hidden>
+          <div class="section-heading">
+            <div>
+              <p class="section-kicker">RESULTADOS DE BÚSQUEDA</p>
+              <h2 id="location-heading">Elige la ubicación</h2>
+            </div>
+            <p class="section-heading__hint">Hay varias coincidencias. Selecciona la ciudad y el país que buscas.</p>
+          </div>
+          <ul id="location-list" class="location-list"></ul>
+        </section>
+
+        <section id="welcome-panel" class="welcome-panel" aria-label="Bienvenida">
+          <div class="welcome-panel__icon" aria-hidden="true">
+            <svg viewBox="0 0 88 72">
+              <circle cx="58" cy="23" r="15" fill="#f5bd55"></circle>
+              <path d="M19 48a13 13 0 0 1 24-6.5A11 11 0 1 1 47 62H20a7 7 0 0 1-1-14Z" fill="#fff" stroke="#8baeb3" stroke-width="2"></path>
+            </svg>
+          </div>
+          <div>
+            <h2>Tu ciudad, bajo otro cielo.</h2>
+            <p>Haz una búsqueda y aquí aparecerán las condiciones actuales y la previsión de la semana.</p>
+          </div>
+        </section>
+
+        <section id="weather-view" class="weather-view" aria-label="Previsión meteorológica" hidden>
+          <div class="weather-summary-row">
+            <span class="weather-summary-row__dot" aria-hidden="true"></span>
+            <p id="weather-summary" class="weather-summary"></p>
+          </div>
+
+          <article id="weather-card" class="weather-card" data-condition="clear" data-time="day">
+            <div class="weather-card__art" aria-hidden="true">
+              <span class="weather-card__sun"></span>
+              <span class="weather-card__ridge weather-card__ridge--back"></span>
+              <span class="weather-card__ridge weather-card__ridge--front"></span>
+            </div>
+
+            <div class="weather-card__content">
+              <div class="weather-card__current">
+                <div class="weather-card__topline">
+                  <div class="location-info">
+                    <h2 id="location-name" class="location-name"></h2>
+                    <p id="weather-description" class="weather-description"></p>
+                  </div>
+                  <p class="current-time"><span class="current-time__dot" aria-hidden="true"></span><span id="observed-time">Ahora</span></p>
+                </div>
+
+                <div class="weather-primary">
+                  <div class="weather-primary__reading">
+                    <div class="temperature-row">
+                      <p id="temperature-value" class="temperature-value"></p>
+                      <div class="unit-switch" role="group" aria-label="Unidad de temperatura">
+                        <button id="unit-fahrenheit" class="unit-switch__button" type="button" data-unit="fahrenheit" aria-pressed="false">°F</button>
+                        <button id="unit-celsius" class="unit-switch__button" type="button" data-unit="celsius" aria-pressed="true">°C</button>
+                      </div>
+                    </div>
+                    <p class="high-low">
+                      <span><span class="high-low__arrow" aria-hidden="true">↑</span> Máx. <strong id="high-temperature">—</strong></span>
+                      <span><span class="high-low__arrow high-low__arrow--down" aria-hidden="true">↓</span> Mín. <strong id="low-temperature">—</strong></span>
+                    </p>
+                  </div>
+                  <div id="current-icon" class="current-icon" aria-hidden="true"></div>
+                </div>
+
+                <ul class="weather-details" aria-label="Detalles del tiempo actual">
+                  <li class="weather-detail">
+                    <span class="weather-detail__label">Sensación</span>
+                    <strong id="feels-like" class="weather-detail__value">—</strong>
+                  </li>
+                  <li class="weather-detail">
+                    <span class="weather-detail__label">Humedad</span>
+                    <strong id="humidity" class="weather-detail__value">—</strong>
+                  </li>
+                  <li class="weather-detail">
+                    <span class="weather-detail__label">Viento</span>
+                    <strong id="wind-speed" class="weather-detail__value">—</strong>
+                  </li>
+                  <li class="weather-detail">
+                    <span class="weather-detail__label">Precipitación</span>
+                    <strong id="precipitation" class="weather-detail__value">—</strong>
+                  </li>
+                </ul>
+              </div>
+
+              <section class="forecast-panel" aria-labelledby="forecast-heading">
+                <div class="forecast-panel__heading">
+                  <div>
+                    <p class="section-kicker">MIRA LO QUE VIENE</p>
+                    <h3 id="forecast-heading">Próximos 7 días</h3>
+                  </div>
+                  <p class="forecast-scroll-note">Desliza para ver más <span aria-hidden="true">→</span></p>
+                </div>
+                <div class="forecast-scroll" role="region" aria-label="Previsión diaria de siete días" tabindex="0">
+                  <ol id="forecast-days" class="forecast-days"></ol>
+                </div>
+              </section>
+            </div>
+          </article>
+
+          <div class="weather-attribution">
+            <p>Datos meteorológicos: <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a> · Licencia <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a></p>
+            <p>Al buscar, el nombre de la ciudad y sus coordenadas se consultan en Open-Meteo.</p>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <span>Cielo local</span>
+        <span>Un pronóstico claro, ciudad a ciudad.</span>
+      </footer>
+    </div>
+  </body>
+</html>
