@@ -32,6 +32,7 @@ La propuesta usa HTML semántico, JavaScript nativo y las API públicas de Open-
 - Estados de carga, resultados, búsqueda sin coincidencias y errores de red/API.
 - Interfaz responsive y operable con teclado.
 - Atribución visible a la fuente de datos.
+- Versión de la aplicación visible en el pie de página.
 
 ### Fuera del MVP
 
@@ -191,6 +192,7 @@ Tomar esta descripción como referencia de composición y ambiente, sin copiar m
 6. Una ciudad sin resultados, una API caída o una respuesta no válida producen un mensaje útil, sin dejar un indicador de carga permanente ni mostrar previsión obsoleta como nueva.
 7. La interfaz funciona en móvil y escritorio; la banda de siete días sigue siendo legible y accesible con teclado.
 8. La fuente y atribución requeridas son visibles, y la aplicación no expone claves secretas.
+9. El pie de página muestra la versión actual de la aplicación.
 
 ## 10. Verificación propuesta
 

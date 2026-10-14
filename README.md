@@ -10,6 +10,7 @@ Aplicación web estática para buscar una ciudad y consultar las condiciones act
 - Cambio entre Celsius y Fahrenheit sin volver a consultar la API.
 - Estados de carga, búsqueda sin resultados y errores de conexión/API.
 - Diseño responsive, navegación por teclado y atribución visible a la fuente meteorológica.
+- Versión actual de la aplicación visible en el pie de página.
 
 ## Ejecutar localmente
 
