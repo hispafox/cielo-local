@@ -137,6 +137,7 @@ export async function fetchForecast(location, signal) {
     longitude: String(location.longitude),
     current: "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m",
     daily: "weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max",
+    hourly: "temperature_2m",
     temperature_unit: "celsius",
     wind_speed_unit: "kmh",
     precipitation_unit: "mm",
@@ -153,10 +154,16 @@ export async function fetchForecast(location, signal) {
     throw new Error("El servicio meteorológico devolvió la previsión diaria con un formato inesperado.");
   }
 
+  if (!isRecord(payload.hourly) || !isRecord(payload.hourly_units)) {
+    throw new Error("El servicio meteorológico devolvió la previsión horaria con un formato inesperado.");
+  }
+
   const current = payload.current;
   const currentUnits = payload.current_units;
   const daily = payload.daily;
   const dailyUnits = payload.daily_units;
+  const hourly = payload.hourly;
+  const hourlyUnits = payload.hourly_units;
 
   if (
     typeof current.time !== "string"
@@ -210,6 +217,30 @@ export async function fetchForecast(location, signal) {
     };
   });
 
+  if (
+    !Array.isArray(hourly.time)
+    || !Array.isArray(hourly.temperature_2m)
+    || hourly.time.length === 0
+    || hourly.temperature_2m.length !== hourly.time.length
+  ) {
+    throw new Error("El servicio meteorológico devolvió horas con datos incompletos.");
+  }
+
+  const forecastHours = hourly.time.map((time, index) => {
+    if (typeof time !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(time)) {
+      throw new Error("El servicio meteorológico devolvió una hora no válida.");
+    }
+
+    return {
+      time,
+      temperatureC: requireNumber(
+        { value: hourly.temperature_2m[index] },
+        "value",
+        "temperatura horaria",
+      ),
+    };
+  });
+
   return {
     timeZone: isValidIanaTimeZone(payload.timezone) ? payload.timezone : null,
     current: {
@@ -232,6 +263,10 @@ export async function fetchForecast(location, signal) {
         ? dailyUnits.precipitation_probability_max
         : "%",
     },
+    hourlyUnits: {
+      temperature: requireUnit(hourlyUnits, "temperature_2m", "temperatura horaria"),
+    },
     days: forecastDays,
+    hours: forecastHours,
   };
 }

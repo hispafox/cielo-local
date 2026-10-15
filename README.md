@@ -7,6 +7,7 @@ Aplicación web estática para buscar una ciudad y consultar las condiciones act
 - Búsqueda de ciudades por nombre y elección de ubicación cuando hay varias coincidencias.
 - Previsión actual con temperatura, sensación térmica, humedad, viento y precipitación.
 - Previsión diaria de hasta siete días, con máximas, mínimas y probabilidad de precipitación.
+- Previsión de temperaturas hora a hora para las próximas 12 horas, con máximas y mínimas del periodo.
 - Reloj analógico de la hora local del navegador y reloj de la ubicación consultada, con segundos y lectura textual.
 - La hora de destino utiliza la zona IANA devuelta por Forecast; no requiere permisos de ubicación ni una consulta adicional.
 - Cambio entre Celsius y Fahrenheit sin volver a consultar la API.
@@ -37,7 +38,7 @@ Al buscar, el nombre de la ciudad se envía al servicio de geocodificación; des
 
 ## Pruebas
 
-Se necesita Node.js 18 o posterior. Las pruebas usan el ejecutor integrado de Node y respuestas simuladas; no llaman a las API reales:
+Se necesita Node.js 18 o posterior. Las pruebas usan el ejecutor integrado de Node y respuestas simuladas; no llaman a las API reales. También comprueban la previsión horaria, las zonas horarias y el cambio horario:
 
 ```powershell
 npm test
@@ -49,6 +50,7 @@ No hay dependencias npm de producción ni es necesario ejecutar `npm install`.
 
 - En pantallas amplias, la tarjeta muestra los siete días en una fila.
 - En móvil, los datos actuales pasan a una cuadrícula compacta y la previsión semanal se desplaza horizontalmente para mantener legibles las siete jornadas.
+- La previsión de las próximas 12 horas se desplaza horizontalmente en pantallas estrechas e incluye las máximas y mínimas del periodo.
 - Los relojes permanecen visibles junto a la previsión; en móvil se adaptan o apilan. Cada esfera tiene un nombre y una lectura textual accesible, sin anuncios automáticos por segundo.
 - El formulario funciona con Enter y botón; los controles tienen etiquetas y foco visible, y los cambios de estado se anuncian a tecnologías de asistencia.
 - La tarjeta utiliza fondos e iconos locales; no depende de la imagen de referencia como recurso de la interfaz.

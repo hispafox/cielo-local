@@ -28,6 +28,7 @@ La propuesta usa HTML semántico, JavaScript nativo y las API públicas de Open-
 - Selector de coincidencias cuando haga falta.
 - Condiciones actuales: temperatura, sensación térmica, humedad, viento y código/ descripción del tiempo.
 - Previsión diaria de siete días: icono o símbolo, descripción, máximas y mínimas y probabilidad máxima de precipitación cuando esté disponible.
+- Previsión de temperatura hora a hora para las próximas 12 horas, con máximas y mínimas del periodo.
 - Celsius por defecto, con un conmutador Celsius/Fahrenheit que actualiza todas las temperaturas de la vista; fechas presentadas en español.
 - Dos relojes analógicos redondos: hora local del navegador y hora de la ubicación seleccionada a partir de la zona IANA validada de Forecast. Las agujas y la lectura textual avanzan cada segundo y `Intl` aplica las transiciones estacionales.
 - Una tarjeta visual de previsión inspirada en la referencia compartida, sin valores de ejemplo fijos ni datos meteorológicos inventados.
@@ -40,7 +41,7 @@ La propuesta usa HTML semántico, JavaScript nativo y las API públicas de Open-
 
 - Cuentas, favoritos persistentes, base de datos o historial.
 - Mapa, búsqueda automática por GPS, alertas o notificaciones.
-- Previsión horaria y comparación entre modelos meteorológicos.
+- Comparación entre modelos meteorológicos.
 - Backend propio, salvo que la elección futura de proveedor o sus condiciones lo hagan necesario.
 
 ## 4. Servicios y contrato de integración
@@ -71,6 +72,7 @@ GET https://api.open-meteo.com/v1/forecast
     &longitude={longitud}
     &current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m
     &daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max
+    &hourly=temperature_2m
     &temperature_unit=celsius
     &wind_speed_unit=kmh
     &precipitation_unit=mm
@@ -79,6 +81,7 @@ GET https://api.open-meteo.com/v1/forecast
 ```
 
 - Presentar las unidades que devuelve la API (`current_units` y `daily_units`) junto con los valores.
+- Solicitar y validar la serie horaria y su unidad; presentar las próximas 12 horas con temperaturas convertibles a Fahrenheit en el cliente.
 - Formatear fechas con `Intl.DateTimeFormat` y el locale `es-ES`.
 - Solicitar `timezone=auto` y conservar `timezone` solo si el identificador que devuelve Forecast es aceptado por `Intl` como zona horaria; usar ese identificador IANA para la lectura del destino. No inferir zonas de nombres u offsets ni hacer una petición adicional. Si falta o no es válido, la previsión meteorológica que ya pasó su validación conserva su comportamiento y el reloj de destino indica que no está disponible.
 - Traducir los códigos `weather_code` según la tabla WMO enlazada en la documentación del proveedor; mantener esa correspondencia en un único lugar del código.
@@ -208,6 +211,7 @@ Tomar esta descripción como referencia de composición y ambiente, sin copiar m
 9. El pie de página muestra la versión actual de la aplicación.
 10. Se ven ambos relojes con nombre y lectura textual; el local usa el reloj/zona del navegador y el de destino la zona IANA de la respuesta Forecast vigente, con segundos y cambios estacionales.
 11. Una búsqueda nueva, ambigua, sin resultados o fallida no deja visible una lectura/zona de destino anterior; la hora local permanece activa. La interfaz no usa geolocalización ni permisos.
+12. Tras una previsión válida se muestran las temperaturas de las próximas 12 horas y sus máximas y mínimas; cambian correctamente entre Celsius y Fahrenheit sin otra petición.
 
 ## 10. Verificación propuesta
 
@@ -215,7 +219,8 @@ Tomar esta descripción como referencia de composición y ambiente, sin copiar m
 - Verificar en el navegador que se realizan las dos peticiones esperadas y que la respuesta de previsión corresponde a las coordenadas elegidas.
 - Probar Enter, botón, foco visible, mensajes anunciados, estados de carga/error y tamaños de pantalla móvil/escritorio.
 - Verificar que al activar el reloj de destino se utiliza exclusivamente `timezone` de Forecast para la búsqueda vigente y que no se añade una petición; la hora local no debe invocar geolocalización ni pedir permisos.
-- Las pruebas automatizadas cubren la conversión de temperaturas, el formateo de fechas y horas por zona IANA, un cambio estacional, los códigos WMO y el contrato de las API con respuestas simuladas; no dependen de llamadas a servicios reales.
+- Verificar que la previsión horaria se obtiene en la misma respuesta Forecast y se presenta en móvil en una banda desplazable.
+- Las pruebas automatizadas cubren la conversión de temperaturas, la previsión horaria, el formateo de fechas y horas por zona IANA, un cambio estacional, los códigos WMO y el contrato de las API con respuestas simuladas; no dependen de llamadas a servicios reales.
 
 
 ## 11. Referencias oficiales

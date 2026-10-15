@@ -72,6 +72,9 @@ const elements = {
   precipitation: document.querySelector("#precipitation"),
   currentIcon: document.querySelector("#current-icon"),
   forecastDays: document.querySelector("#forecast-days"),
+  hourlyHigh: document.querySelector("#hourly-high"),
+  hourlyLow: document.querySelector("#hourly-low"),
+  hourlyForecast: document.querySelector("#hourly-forecast"),
   unitButtons: [...document.querySelectorAll("[data-unit]")],
 };
 
@@ -257,6 +260,13 @@ function temperatureUnitSuffix() {
   return temperatureUnit === "fahrenheit" ? "F" : "C";
 }
 
+function getUpcomingHours(weather) {
+  const currentHour = weather.current.time.slice(0, 16);
+  return weather.hours
+    .filter((hour) => hour.time >= currentHour)
+    .slice(0, 12);
+}
+
 function renderTemperatures() {
   if (!currentWeather) {
     return;
@@ -264,6 +274,7 @@ function renderTemperatures() {
 
   const { current, days } = currentWeather;
   const suffix = temperatureUnitSuffix();
+  const upcomingHours = getUpcomingHours(currentWeather);
   elements.temperature.textContent = formatTemperature(current.temperatureC, temperatureUnit);
   elements.high.textContent = formatTemperature(days[0].highC, temperatureUnit);
   elements.low.textContent = formatTemperature(days[0].lowC, temperatureUnit);
@@ -287,6 +298,30 @@ function renderTemperatures() {
     lowValue.textContent = low;
     temperatures.append(highValue, separator, lowValue);
     temperatures.setAttribute("aria-label", `Máxima ${high} ${suffix}, mínima ${low} ${suffix}`);
+  }
+
+  if (upcomingHours.length > 0) {
+    elements.hourlyHigh.textContent = formatTemperature(
+      Math.max(...upcomingHours.map((hour) => hour.temperatureC)),
+      temperatureUnit,
+    );
+    elements.hourlyLow.textContent = formatTemperature(
+      Math.min(...upcomingHours.map((hour) => hour.temperatureC)),
+      temperatureUnit,
+    );
+
+    for (const hourElement of elements.hourlyForecast.children) {
+      const hour = upcomingHours[Number(hourElement.dataset.hourIndex)];
+      const temperature = hourElement.querySelector(".hourly-forecast__temperature");
+      temperature.textContent = formatTemperature(hour.temperatureC, temperatureUnit);
+      hourElement.setAttribute(
+        "aria-label",
+        `${hour.time.slice(11, 16)}: ${temperature.textContent} ${suffix}`,
+      );
+    }
+  } else {
+    elements.hourlyHigh.textContent = "—";
+    elements.hourlyLow.textContent = "—";
   }
 
   for (const button of elements.unitButtons) {
@@ -331,6 +366,40 @@ function renderForecastDays(weather) {
   elements.forecastDays.replaceChildren(...dayElements);
 }
 
+function renderHourlyForecast(weather) {
+  const upcomingHours = getUpcomingHours(weather);
+  if (upcomingHours.length === 0) {
+    const message = document.createElement("li");
+    message.className = "hourly-forecast__empty";
+    message.textContent = "No hay temperaturas horarias disponibles.";
+    elements.hourlyForecast.replaceChildren(message);
+    return;
+  }
+
+  const hourElements = upcomingHours.map((hour, index) => {
+    const item = document.createElement("li");
+    item.className = "hourly-forecast__item";
+    item.dataset.hourIndex = String(index);
+
+    const time = document.createElement("time");
+    time.className = "hourly-forecast__time";
+    time.dateTime = hour.time;
+    time.textContent = `${hour.time.slice(11, 13)} h`;
+
+    const temperature = document.createElement("strong");
+    temperature.className = "hourly-forecast__temperature";
+    temperature.textContent = formatTemperature(hour.temperatureC, temperatureUnit);
+    item.setAttribute(
+      "aria-label",
+      `${hour.time.slice(11, 16)}: ${temperature.textContent} ${temperatureUnitSuffix()}`,
+    );
+    item.append(time, temperature);
+    return item;
+  });
+
+  elements.hourlyForecast.replaceChildren(...hourElements);
+}
+
 function renderWeather() {
   const { current, currentUnits } = currentWeather;
   const currentInfo = getWeatherInfo(current.weatherCode);
@@ -353,6 +422,7 @@ function renderWeather() {
   elements.precipitation.textContent = formatAmount(current.precipitation, currentUnits.precipitation);
 
   renderForecastDays(currentWeather);
+  renderHourlyForecast(currentWeather);
   renderTemperatures();
   elements.weatherView.hidden = false;
   elements.welcome.hidden = true;

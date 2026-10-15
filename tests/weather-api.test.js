@@ -88,6 +88,14 @@ test("solicita siete días y normaliza la respuesta meteorológica", async () =>
       temperature_2m_min: "°C",
       precipitation_probability_max: "%",
     },
+    hourly: {
+      time: ["2026-10-14T10:00", "2026-10-14T11:00", "2026-10-14T12:00"],
+      temperature_2m: [16, 18, 17],
+    },
+    hourly_units: {
+      time: "iso8601",
+      temperature_2m: "°C",
+    },
   };
 
   await withMockedFetch(async (input) => {
@@ -104,11 +112,18 @@ test("solicita siete días y normaliza la respuesta meteorológica", async () =>
     assert.equal(forecast.currentUnits.windSpeed, "km/h");
     assert.equal(forecast.days.length, 7);
     assert.equal(forecast.days[4].precipitationProbability, 65);
+    assert.deepEqual(forecast.hours, [
+      { time: "2026-10-14T10:00", temperatureC: 16 },
+      { time: "2026-10-14T11:00", temperatureC: 18 },
+      { time: "2026-10-14T12:00", temperatureC: 17 },
+    ]);
+    assert.equal(forecast.hourlyUnits.temperature, "°C");
   });
 
   assert.equal(requestedUrl.origin, "https://api.open-meteo.com");
   assert.equal(requestedUrl.searchParams.get("forecast_days"), "7");
   assert.equal(requestedUrl.searchParams.get("temperature_unit"), "celsius");
+  assert.equal(requestedUrl.searchParams.get("hourly"), "temperature_2m");
   assert.equal(requestedUrl.searchParams.get("timezone"), "auto");
   assert.equal(requestCount, 1);
   assert.equal(
