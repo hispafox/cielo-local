@@ -15,8 +15,10 @@
 ## Comportamiento y datos
 
 - La interfaz y sus mensajes deben estar en español (`es-ES`); formatea fechas con `Intl.DateTimeFormat`.
+- El reloj local debe omitir `timeZone` y usar la zona del entorno de `Intl`; el reloj del destino debe pasarle `timezone` de Forecast. Mantén la lectura en formato español de 24 horas con segundos.
 - Usa un formulario real para que la búsqueda funcione tanto con Enter como con el botón. No consultes las API en cada pulsación; exige al menos dos caracteres y permite elegir ubicación cuando haya coincidencias ambiguas.
 - Usa Open-Meteo Geocoding para resolver la ciudad y Open-Meteo Forecast para consultar por las coordenadas elegidas. Construye parámetros con `URLSearchParams` y utiliza HTTPS.
+- Forecast se solicita con `timezone=auto`: solo el campo `timezone` validado de su respuesta vigente puede alimentar el reloj del destino. No infieras la zona por el nombre o un offset y no añadas peticiones. Si falta o no pasa la validación, deja el destino explícitamente no disponible; conserva el comportamiento meteorológico existente si sus demás datos son válidos.
 - Muestra las condiciones actuales y siete días de previsión. Usa Celsius por defecto y permite cambiar a Fahrenheit convirtiendo en el cliente todas las temperaturas (actual, sensación térmica, máximas y mínimas), sin otra petición a la API.
 - Traduce los códigos meteorológicos WMO desde una única correspondencia. Renderiza solo datos recibidos y validados; nunca uses valores de la imagen de referencia como valores predeterminados.
 
@@ -25,6 +27,7 @@
 - Sigue la tarjeta clara y atmosférica descrita en el análisis: ubicación y condiciones actuales, temperatura destacada, máximas/mínimas, selector de unidades y banda de siete días. En móvil, la previsión debe seguir siendo legible y desplazable.
 - Usa gradientes e iconografía propia CSS/SVG; conserva buen contraste y no comuniques las condiciones solo mediante color.
 - Mantén controles etiquetados, foco visible, operación completa con teclado y estados anunciados con `aria-live`. El selector `°C`/`°F` debe exponer su estado accesiblemente.
+- Mantén los relojes fuera de la región `aria-live`: su lectura textual accesible cambia cada segundo y no debe anunciarse automáticamente en cada tick. Anuncia solo transiciones de estado significativas; el dial puede ser decorativo porque el texto comunica la hora.
 
 ## Robustez, seguridad y atribución
 
@@ -41,4 +44,5 @@
 
 - Antes de cambiar código, inspecciona la estructura, dependencias y pruebas existentes; sigue sus convenciones y no inventes comandos de build o test.
 - Añade o ajusta pruebas focalizadas para lógica de unidades, fechas y códigos WMO. Simula las respuestas HTTP en pruebas automatizadas en vez de depender de la API en vivo.
+- Para la lógica horaria, inyecta instantes `Date` y zonas IANA a `time-utils.js`; comprueba formato localizado, segundos, posición de agujas y al menos una transición DST sin depender del reloj real ni de Open-Meteo. Incluye `timezone` válida en fixtures de Forecast y casos ausentes/no válidos; nunca sustituyas esos casos por un offset.
 - Ejecuta la validación existente más acotada que cubra el cambio y comunica cualquier comprobación que no se haya podido ejecutar.

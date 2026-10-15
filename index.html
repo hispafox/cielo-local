@@ -78,6 +78,71 @@
           <ul id="location-list" class="location-list"></ul>
         </section>
 
+        <section class="clocks-panel" aria-labelledby="clocks-heading">
+          <div class="clocks-panel__heading">
+            <p class="section-kicker">DOS LUGARES, DOS HORAS</p>
+            <h2 id="clocks-heading">Cada cielo sigue su propio ritmo</h2>
+          </div>
+          <div class="clocks-panel__grid">
+            <article class="clock-card" aria-labelledby="local-clock-title">
+              <h3 id="local-clock-title" class="clock-card__title">Hora local</h3>
+              <div class="clock-face" aria-hidden="true">
+                <svg class="clock-face__markers" viewBox="0 0 100 100" focusable="false">
+                  <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8">
+                    <path d="M50 7v8"></path>
+                    <path d="M50 7v8" transform="rotate(30 50 50)"></path>
+                    <path d="M50 7v8" transform="rotate(60 50 50)"></path>
+                    <path d="M50 7v8" transform="rotate(90 50 50)"></path>
+                    <path d="M50 7v8" transform="rotate(120 50 50)"></path>
+                    <path d="M50 7v8" transform="rotate(150 50 50)"></path>
+                    <path d="M50 7v8" transform="rotate(180 50 50)"></path>
+                    <path d="M50 7v8" transform="rotate(210 50 50)"></path>
+                    <path d="M50 7v8" transform="rotate(240 50 50)"></path>
+                    <path d="M50 7v8" transform="rotate(270 50 50)"></path>
+                    <path d="M50 7v8" transform="rotate(300 50 50)"></path>
+                    <path d="M50 7v8" transform="rotate(330 50 50)"></path>
+                  </g>
+                </svg>
+                <span id="local-clock-hour-hand" class="clock-face__hand clock-face__hand--hour"></span>
+                <span id="local-clock-minute-hand" class="clock-face__hand clock-face__hand--minute"></span>
+                <span id="local-clock-second-hand" class="clock-face__hand clock-face__hand--second"></span>
+                <span class="clock-face__pin"></span>
+              </div>
+              <p class="clock-card__reading"><time id="local-clock-time" datetime="">--:--:--</time></p>
+            </article>
+
+            <article class="clock-card" aria-labelledby="destination-clock-title">
+              <h3 id="destination-clock-title" class="clock-card__title">Hora de destino</h3>
+              <div id="destination-clock-face" class="clock-face clock-face--pending" aria-hidden="true">
+                <svg class="clock-face__markers" viewBox="0 0 100 100" focusable="false">
+                  <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8">
+                    <path d="M50 7v8"></path>
+                    <path d="M50 7v8" transform="rotate(30 50 50)"></path>
+                    <path d="M50 7v8" transform="rotate(60 50 50)"></path>
+                    <path d="M50 7v8" transform="rotate(90 50 50)"></path>
+                    <path d="M50 7v8" transform="rotate(120 50 50)"></path>
+                    <path d="M50 7v8" transform="rotate(150 50 50)"></path>
+                    <path d="M50 7v8" transform="rotate(180 50 50)"></path>
+                    <path d="M50 7v8" transform="rotate(210 50 50)"></path>
+                    <path d="M50 7v8" transform="rotate(240 50 50)"></path>
+                    <path d="M50 7v8" transform="rotate(270 50 50)"></path>
+                    <path d="M50 7v8" transform="rotate(300 50 50)"></path>
+                    <path d="M50 7v8" transform="rotate(330 50 50)"></path>
+                  </g>
+                </svg>
+                <span id="destination-clock-hour-hand" class="clock-face__hand clock-face__hand--hour"></span>
+                <span id="destination-clock-minute-hand" class="clock-face__hand clock-face__hand--minute"></span>
+                <span id="destination-clock-second-hand" class="clock-face__hand clock-face__hand--second"></span>
+                <span class="clock-face__pin"></span>
+              </div>
+              <p class="clock-card__reading">
+                <time id="destination-clock-time" datetime="" hidden></time>
+              </p>
+              <p id="destination-clock-status" class="clock-card__status">Busca una ubicación para ver su hora.</p>
+            </article>
+          </div>
+        </section>
+
         <section id="welcome-panel" class="welcome-panel" aria-label="Bienvenida">
           <div class="welcome-panel__icon" aria-hidden="true">
             <svg viewBox="0 0 88 72">
@@ -176,7 +241,7 @@
       <footer class="site-footer">
         <span>Cielo local</span>
         <span>Un pronóstico claro, ciudad a ciudad.</span>
-        <span>Versión 1.0.0</span>
+        <span>Versión 1.1.0</span>
       </footer>
     </div>
   </body>
