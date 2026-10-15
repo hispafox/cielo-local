@@ -1,0 +1,31 @@
+{
+  "issue": null,
+  "updatedAt": null,
+  "agents": {
+    "orchestrator": {
+      "status": "waiting",
+      "message": "",
+      "updatedAt": null
+    },
+    "planner": {
+      "status": "waiting",
+      "message": "",
+      "updatedAt": null
+    },
+    "developer": {
+      "status": "waiting",
+      "message": "",
+      "updatedAt": null
+    },
+    "verifier": {
+      "status": "waiting",
+      "message": "",
+      "updatedAt": null
+    }
+  },
+  "release": {
+    "status": "waiting",
+    "message": "",
+    "updatedAt": null
+  }
+}

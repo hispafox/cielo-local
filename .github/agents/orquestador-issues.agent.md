@@ -22,6 +22,14 @@ Eres el coordinador del flujo de trabajo de issues. Recibes un issue existente y
 
 Usa `gh` para consultar GitHub y `git` para operaciones locales. No hagas push, commit ni abras un pull request antes de la verificación satisfactoria.
 
+## Publicación del estado
+
+Mantén actualizado `workflow-status.json` para que el tablero del workspace muestre el flujo real. Haz las comprobaciones de prerrequisitos antes de inicializar o cambiar el estado. Al iniciar un issue distinto del que figura en el archivo, conserva el JSON existente, publica `issue` con `id` (sin `#`), `title` y, si se conoce, `url`, y reinicia las etapas de ese nuevo flujo a `waiting`; pon `updatedAt` en una fecha ISO UTC. Actualiza tu etapa `agents.orchestrator` a `active` antes de coordinar el trabajo, a `completed` al terminar o a `blocked` si debes detenerte y esperar una decisión.
+
+El orquestador es dueño de `issue`, `agents.orchestrator` y `release`; también inicializa las etapas en `waiting` una sola vez al cambiar a otro issue. Después de esa inicialización, cada agente delegado actualiza únicamente su propia entrada en `agents`. Antes de escribir, vuelve a leer el JSON, conserva los cambios de los demás y modifica solo los campos que te corresponden; actualiza también la fecha global y la fecha de la etapa. No restablezcas estados entre ciclos ni sobrescribas el archivo con una copia antigua. Usa solo `waiting`, `active`, `completed` o `blocked`, y escribe un mensaje breve que explique el estado real. Si el archivo falta o no es JSON válido, inicialízalo con el esquema de `workflow-status.json`.
+
+Marca `release` como `active` solo después de la aprobación del Verificador; termina en `completed` si la publicación concluye o `blocked` si falla. Al revisar si el árbol está limpio y al elegir cambios para el commit/PR, trata únicamente `workflow-status.json` como estado operativo: no lo incluyas en el commit/PR ni lo reviertas. No ignores ni alteres ningún otro cambio local.
+
 ## Flujo de trabajo
 
 1. **Planificar:** invoca una vez a **Planificador de issues** con el issue completo. Si falta información bloqueante, detente y transmite las preguntas al usuario. Conserva la ruta exacta del plan que devuelve y comprueba que existe.

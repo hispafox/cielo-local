@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <meta name="theme-color" content="#f4f7f6">
+    <meta name="description" content="Visualiza el estado de los agentes que trabajan en un issue.">
+    <title>Flujo del issue — Cielo local</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="./workflow.css">
+    <script type="module" src="./src/workflow-dashboard.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Saltar al contenido</a>
+    <div class="page-shell">
+      <header class="site-header">
+        <a class="brand" href="./index.html" aria-label="Cielo local, inicio">
+          <span class="brand__mark" aria-hidden="true">
+            <svg viewBox="0 0 48 48">
+              <circle cx="24" cy="24" r="20" fill="#eaf5f6"></circle>
+              <path d="M14 27a8 8 0 0 1 15.4-3.1A6.4 6.4 0 1 1 31 36H15a4.5 4.5 0 0 1-1-9Z" fill="#fff" stroke="#78a6ad" stroke-width="1.5"></path>
+              <circle cx="30" cy="17" r="5" fill="#f5bf55"></circle>
+            </svg>
+          </span>
+          <span class="brand__wordmark">cielo <strong>local</strong></span>
+        </a>
+        <a class="back-link" href="./index.html">Volver a la previsión <span aria-hidden="true">↗</span></a>
+      </header>
+
+      <main id="main-content">
+        <section class="page-intro" aria-labelledby="page-title">
+          <p class="eyebrow"><span aria-hidden="true"></span> SEGUIMIENTO DE AGENTES</p>
+          <h1 id="page-title">El flujo del issue,<br class="wide-break"> de un vistazo.</h1>
+          <p class="intro-copy">Sigue quién está trabajando, qué ha terminado y dónde necesita atención.</p>
+        </section>
+
+        <section class="issue-panel" aria-labelledby="issue-heading">
+          <div class="issue-copy">
+            <p class="section-kicker">ISSUE EN CURSO</p>
+            <h2 id="issue-heading">Esperando el primer issue</h2>
+            <p id="issue-description">El orquestador publicará aquí el issue cuando inicie el flujo.</p>
+          </div>
+          <a id="issue-link" class="issue-link" href="" target="_blank" rel="noopener noreferrer" hidden>
+            Abrir issue <span aria-hidden="true">↗</span>
+          </a>
+          <div class="progress" aria-label="Progreso de las etapas">
+            <div class="progress__summary">
+              <span>Etapas completadas</span>
+              <strong id="progress-label">0 de 5</strong>
+            </div>
+            <div
+              id="progress-track"
+              class="progress__track"
+              role="progressbar"
+              aria-label="Etapas completadas"
+              aria-valuemin="0"
+              aria-valuemax="5"
+              aria-valuenow="0"
+            >
+              <span id="progress-fill"></span>
+            </div>
+          </div>
+        </section>
+
+        <section class="workflow-section" aria-labelledby="workflow-heading">
+          <div class="section-heading">
+            <div>
+              <p class="section-kicker">RUTA DE TRABAJO</p>
+              <h2 id="workflow-heading">Agentes y entregas</h2>
+            </div>
+            <div class="refresh-controls">
+              <span id="demo-badge" class="demo-badge" hidden>DEMO · datos ficticios</span>
+              <span id="connection-indicator" class="connection-indicator" data-state="loading">
+                <span aria-hidden="true"></span>
+                <span id="connection-label">Conectando…</span>
+              </span>
+              <button id="demo-toggle" class="refresh-button" type="button">Probar modo demo</button>
+              <button id="demo-next" class="refresh-button demo-next" type="button" hidden>Siguiente paso</button>
+              <button id="refresh-button" class="refresh-button" type="button">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M20 7v5h-5M4 17v-5h5"></path>
+                  <path d="M5.5 9a7 7 0 0 1 11.8-2L20 12M4 12l2.7 5A7 7 0 0 0 18.5 15"></path>
+                </svg>
+                Actualizar
+              </button>
+            </div>
+          </div>
+
+          <p id="feed-message" class="feed-message" role="status" aria-live="polite" hidden></p>
+
+          <div class="diagram-frame">
+            <p class="diagram-hint">Selecciona un agente o una entrega para ver su estado y actividad.</p>
+            <div class="diagram-scroll" tabindex="0" aria-label="Diagrama del flujo; se puede desplazar horizontalmente">
+              <svg
+                id="workflow-diagram"
+                class="workflow-diagram"
+                viewBox="0 0 1120 610"
+                role="group"
+                aria-labelledby="diagram-title diagram-description"
+              >
+                <title id="diagram-title">Flujo de trabajo de un issue</title>
+                <desc id="diagram-description">El orquestador coordina al planificador, al desarrollador y al verificador. El desarrollador repite la implementación si el verificador encuentra problemas, hasta tres ciclos. Tras la aprobación se realiza el versionado y se prepara el pull request.</desc>
+                <defs>
+                  <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+                    <path d="M0 0 8 4 0 8Z" fill="currentColor"></path>
+                  </marker>
+                  <marker id="arrow-muted" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+                    <path d="M0 0 8 4 0 8Z" fill="#b8c6c4"></path>
+                  </marker>
+                </defs>
+
+                <g class="flow-edges" aria-hidden="true">
+                  <path class="flow-edge" d="M190 290H270"></path>
+                  <path class="flow-edge" d="M455 263C500 215 515 130 565 130"></path>
+                  <path class="flow-edge" d="M740 123C792 123 803 127 845 130"></path>
+                  <path class="flow-edge" d="M845 157C803 210 792 275 740 275"></path>
+                  <path class="flow-edge" d="M455 294H565"></path>
+                  <path class="flow-edge flow-edge--return" d="M565 298C520 330 505 337 455 322"></path>
+                  <path class="flow-edge" d="M455 325C505 365 520 425 565 425"></path>
+                  <path class="flow-edge flow-edge--return" d="M565 435C515 445 500 380 455 340"></path>
+                  <path class="flow-edge flow-edge--retry" d="M650 470C600 525 520 530 455 350"></path>
+                  <path class="flow-edge flow-edge--release" d="M455 347C570 430 700 535 835 535"></path>
+                  <path class="flow-edge flow-edge--plan-return" d="M955 165C1035 260 1035 500 845 535"></path>
+                  <text class="edge-label" x="500" y="183">issue</text>
+                  <text class="edge-label" x="770" y="111">crea plan</text>
+                  <text class="edge-label" x="770" y="222">issue + plan</text>
+                  <text class="edge-label" x="488" y="282">issue + ruta del plan</text>
+                  <text class="edge-label" x="466" y="342">plan + implementación</text>
+                  <text class="edge-label" x="468" y="423">aprobación o hallazgos</text>
+                  <text class="edge-label edge-label--retry" x="470" y="503">si falla: hasta 3 ciclos</text>
+                  <text class="edge-label" x="665" y="475">solo tras aprobación</text>
+                  <text class="edge-label" x="955" y="553">ruta exacta</text>
+                </g>
+
+                <g class="flow-node flow-node--source" data-agent="issue" role="button" tabindex="0" aria-label="Issue de entrada" aria-pressed="false">
+                  <rect class="flow-node__surface" x="30" y="250" width="160" height="80" rx="12"></rect>
+                  <text class="flow-node__title" x="110" y="284" text-anchor="middle">Issue</text>
+                  <text class="flow-node__subtitle" x="110" y="305" text-anchor="middle">entrada del flujo</text>
+                  <circle class="flow-node__dot" cx="53" cy="318" r="5"></circle>
+                  <text id="node-status-issue" class="flow-node__status" x="66" y="322">Sin datos</text>
+                </g>
+
+                <g class="flow-node" data-agent="orchestrator" data-status="unknown" role="button" tabindex="0" aria-label="Orquestador, sin datos" aria-pressed="false">
+                  <rect class="flow-node__surface" x="270" y="235" width="185" height="112" rx="14"></rect>
+                  <text class="flow-node__title" x="362.5" y="265" text-anchor="middle">Orquestador</text>
+                  <text class="flow-node__subtitle" x="362.5" y="286" text-anchor="middle">agente coordinador</text>
+                  <circle class="flow-node__dot" cx="300" cy="320" r="5"></circle>
+                  <text id="node-status-orchestrator" class="flow-node__status" x="313" y="324">Sin datos</text>
+                </g>
+
+                <g class="flow-node" data-agent="planner" data-status="unknown" role="button" tabindex="0" aria-label="Planificador, sin datos" aria-pressed="false">
+                  <rect class="flow-node__surface" x="565" y="85" width="175" height="90" rx="12"></rect>
+                  <text class="flow-node__title" x="652.5" y="116" text-anchor="middle">Planificador</text>
+                  <text class="flow-node__subtitle" x="652.5" y="137" text-anchor="middle">agente subagente</text>
+                  <circle class="flow-node__dot" cx="590" cy="158" r="5"></circle>
+                  <text id="node-status-planner" class="flow-node__status" x="603" y="162">Sin datos</text>
+                </g>
+
+                <g class="flow-node flow-node--artifact" data-agent="plan" data-status="unknown" role="button" tabindex="0" aria-label="Documento de planificación, sin datos" aria-pressed="false">
+                  <rect class="flow-node__surface" x="845" y="95" width="220" height="70" rx="12"></rect>
+                  <text class="flow-node__title flow-node__title--small" x="955" y="125" text-anchor="middle">docs/planificacion-*.md</text>
+                  <circle class="flow-node__dot" cx="890" cy="148" r="5"></circle>
+                  <text id="node-status-plan" class="flow-node__status" x="903" y="152">Sin datos</text>
+                </g>
+
+                <g class="flow-node" data-agent="developer" data-status="unknown" role="button" tabindex="0" aria-label="Desarrollador, sin datos" aria-pressed="false">
+                  <rect class="flow-node__surface" x="565" y="230" width="175" height="90" rx="12"></rect>
+                  <text class="flow-node__title" x="652.5" y="261" text-anchor="middle">Desarrollador</text>
+                  <text class="flow-node__subtitle" x="652.5" y="282" text-anchor="middle">agente subagente</text>
+                  <circle class="flow-node__dot" cx="590" cy="303" r="5"></circle>
+                  <text id="node-status-developer" class="flow-node__status" x="603" y="307">Sin datos</text>
+                </g>
+
+                <g class="flow-node" data-agent="verifier" data-status="unknown" role="button" tabindex="0" aria-label="Verificador, sin datos" aria-pressed="false">
+                  <rect class="flow-node__surface" x="565" y="380" width="175" height="90" rx="12"></rect>
+                  <text class="flow-node__title" x="652.5" y="411" text-anchor="middle">Verificador</text>
+                  <text class="flow-node__subtitle" x="652.5" y="432" text-anchor="middle">agente subagente</text>
+                  <circle class="flow-node__dot" cx="590" cy="453" r="5"></circle>
+                  <text id="node-status-verifier" class="flow-node__status" x="603" y="457">Sin datos</text>
+                </g>
+
+                <g class="flow-node flow-node--release" data-agent="release" data-status="unknown" role="button" tabindex="0" aria-label="Versionado, commit y pull request, sin datos" aria-pressed="false">
+                  <rect class="flow-node__surface" x="835" y="500" width="230" height="70" rx="12"></rect>
+                  <text class="flow-node__title flow-node__title--small" x="950" y="530" text-anchor="middle">Versionado, commit y PR</text>
+                  <circle class="flow-node__dot" cx="890" cy="553" r="5"></circle>
+                  <text id="node-status-release" class="flow-node__status" x="903" y="557">Sin datos</text>
+                </g>
+              </svg>
+            </div>
+          </div>
+
+          <aside id="agent-detail" class="agent-detail" aria-labelledby="detail-heading">
+            <div class="agent-detail__heading">
+              <div>
+                <p class="section-kicker">DETALLE DE LA ETAPA</p>
+                <h3 id="detail-heading">Selecciona un agente</h3>
+              </div>
+              <span id="detail-status" class="status-badge" data-status="unknown">Sin datos</span>
+            </div>
+            <p id="detail-description" class="agent-detail__description">El estado publicado por los agentes y su última actualización aparecerán aquí.</p>
+            <p id="detail-message" class="agent-detail__message" hidden></p>
+            <div class="agent-detail__meta">
+              <span id="detail-updated">Última actividad: sin datos</span>
+              <span id="detail-extra"></span>
+            </div>
+          </aside>
+        </section>
+
+        <details class="status-help">
+          <summary>¿Cómo se alimenta este tablero?</summary>
+          <div class="status-help__body">
+            <p>Los agentes y el orquestador actualizan <code>workflow-status.json</code> al empezar, terminar o bloquear una etapa. La página vuelve a leerlo cada cinco segundos; no deduce actividad ni inventa estados.</p>
+            <p>Usa <code>waiting</code>, <code>active</code>, <code>completed</code> o <code>blocked</code>. En cada cambio, actualiza el mensaje de la etapa y su fecha <code>updatedAt</code>, además de la fecha global. El desarrollador puede indicar <code>cycle</code> (de 1 a 3) y el planificador el <code>artifact</code> generado.</p>
+            <p>Para ver cambios locales en directo, sirve esta carpeta desde el workspace; un hosting estático solo verá el archivo de estado que se haya publicado.</p>
+          </div>
+        </details>
+      </main>
+
+      <footer class="site-footer">
+        <span>Seguimiento del flujo de agentes</span>
+        <span>Fuente de estado: <code>workflow-status.json</code></span>
+      </footer>
+    </div>
+  </body>
+</html>
