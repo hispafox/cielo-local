@@ -48,11 +48,13 @@ test("geocodifica con parámetros codificados y valida la ubicación", async () 
 
 test("solicita siete días y normaliza la respuesta meteorológica", async () => {
   let requestedUrl;
+  let requestCount = 0;
   const dates = Array.from({ length: 7 }, (_, index) => {
     const date = new Date(Date.UTC(2026, 9, 14 + index, 12));
     return date.toISOString().slice(0, 10);
   });
   const payload = {
+    timezone: "Europe/Madrid",
     current: {
       time: "2026-10-14T10:00",
       temperature_2m: 16,
@@ -89,6 +91,7 @@ test("solicita siete días y normaliza la respuesta meteorológica", async () =>
   };
 
   await withMockedFetch(async (input) => {
+    requestCount += 1;
     requestedUrl = new URL(input);
     return new Response(JSON.stringify(payload), {
       headers: { "content-type": "application/json" },
@@ -97,6 +100,7 @@ test("solicita siete días y normaliza la respuesta meteorológica", async () =>
   }, async () => {
     const forecast = await fetchForecast({ latitude: 40.4, longitude: -3.7 });
     assert.equal(forecast.current.temperatureC, 16);
+    assert.equal(forecast.timeZone, "Europe/Madrid");
     assert.equal(forecast.currentUnits.windSpeed, "km/h");
     assert.equal(forecast.days.length, 7);
     assert.equal(forecast.days[4].precipitationProbability, 65);
@@ -105,10 +109,30 @@ test("solicita siete días y normaliza la respuesta meteorológica", async () =>
   assert.equal(requestedUrl.origin, "https://api.open-meteo.com");
   assert.equal(requestedUrl.searchParams.get("forecast_days"), "7");
   assert.equal(requestedUrl.searchParams.get("temperature_unit"), "celsius");
+  assert.equal(requestedUrl.searchParams.get("timezone"), "auto");
+  assert.equal(requestCount, 1);
   assert.equal(
     requestedUrl.searchParams.get("daily"),
     "weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max",
   );
+
+  for (const timeZone of [undefined, "Mars/Olympus"]) {
+    const payloadWithoutValidZone = structuredClone(payload);
+    if (timeZone === undefined) {
+      delete payloadWithoutValidZone.timezone;
+    } else {
+      payloadWithoutValidZone.timezone = timeZone;
+    }
+
+    await withMockedFetch(async () => new Response(JSON.stringify(payloadWithoutValidZone), {
+      headers: { "content-type": "application/json" },
+      status: 200,
+    }), async () => {
+      const forecast = await fetchForecast({ latitude: 40.4, longitude: -3.7 });
+      assert.equal(forecast.timeZone, null);
+      assert.equal(forecast.current.temperatureC, 16);
+    });
+  }
 });
 
 test("expone los errores HTTP del servicio", async () => {

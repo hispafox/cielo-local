@@ -1,5 +1,6 @@
 import { fetchForecast, searchLocations } from "./weather-api.js";
 import { getWeatherInfo } from "./weather-codes.js";
+import { getClockReading } from "./time-utils.js";
 import { formatDayLabel, formatTemperature } from "./weather-utils.js";
 
 const iconMarkup = {
@@ -45,6 +46,17 @@ const elements = {
   locationPicker: document.querySelector("#location-picker"),
   locationList: document.querySelector("#location-list"),
   welcome: document.querySelector("#welcome-panel"),
+  localClockTime: document.querySelector("#local-clock-time"),
+  localClockHourHand: document.querySelector("#local-clock-hour-hand"),
+  localClockMinuteHand: document.querySelector("#local-clock-minute-hand"),
+  localClockSecondHand: document.querySelector("#local-clock-second-hand"),
+  destinationClockTitle: document.querySelector("#destination-clock-title"),
+  destinationClockFace: document.querySelector("#destination-clock-face"),
+  destinationClockTime: document.querySelector("#destination-clock-time"),
+  destinationClockStatus: document.querySelector("#destination-clock-status"),
+  destinationClockHourHand: document.querySelector("#destination-clock-hour-hand"),
+  destinationClockMinuteHand: document.querySelector("#destination-clock-minute-hand"),
+  destinationClockSecondHand: document.querySelector("#destination-clock-second-hand"),
   weatherView: document.querySelector("#weather-view"),
   summary: document.querySelector("#weather-summary"),
   card: document.querySelector("#weather-card"),
@@ -73,6 +85,69 @@ let currentWeather = null;
 let currentLocation = null;
 let activeController = null;
 let activeRequestId = 0;
+let destinationTimeZone = null;
+
+function renderClock(reading, timeElement, hands) {
+  timeElement.textContent = reading.formattedTime;
+  timeElement.dateTime = reading.instant;
+  hands.hour.style.transform = `rotate(${reading.hourAngle}deg)`;
+  hands.minute.style.transform = `rotate(${reading.minuteAngle}deg)`;
+  hands.second.style.transform = `rotate(${reading.secondAngle}deg)`;
+}
+
+function updateClocks(instant = new Date()) {
+  renderClock(getClockReading(instant), elements.localClockTime, {
+    hour: elements.localClockHourHand,
+    minute: elements.localClockMinuteHand,
+    second: elements.localClockSecondHand,
+  });
+
+  if (destinationTimeZone) {
+    renderClock(getClockReading(instant, destinationTimeZone), elements.destinationClockTime, {
+      hour: elements.destinationClockHourHand,
+      minute: elements.destinationClockMinuteHand,
+      second: elements.destinationClockSecondHand,
+    });
+  }
+}
+
+function setDestinationClockUnavailable(message, location = null) {
+  destinationTimeZone = null;
+  elements.destinationClockTitle.textContent = location
+    ? `Hora en ${formatLocationName(location)}`
+    : "Hora de destino";
+  elements.destinationClockTime.textContent = "";
+  elements.destinationClockTime.removeAttribute("datetime");
+  elements.destinationClockTime.hidden = true;
+  elements.destinationClockStatus.textContent = message;
+  elements.destinationClockStatus.hidden = false;
+  elements.destinationClockFace.classList.add("clock-face--pending");
+  for (const hand of [
+    elements.destinationClockHourHand,
+    elements.destinationClockMinuteHand,
+    elements.destinationClockSecondHand,
+  ]) {
+    hand.style.transform = "rotate(0deg)";
+  }
+}
+
+function activateDestinationClock(location, timeZone) {
+  if (!timeZone) {
+    setDestinationClockUnavailable(
+      "La zona horaria de esta ubicación no está disponible.",
+      location,
+    );
+    return;
+  }
+
+  destinationTimeZone = timeZone;
+  elements.destinationClockTitle.textContent = `Hora en ${formatLocationName(location)}`;
+  elements.destinationClockStatus.textContent = "";
+  elements.destinationClockStatus.hidden = true;
+  elements.destinationClockTime.hidden = false;
+  elements.destinationClockFace.classList.remove("clock-face--pending");
+  updateClocks();
+}
 
 function setStatus(message, kind = "info") {
   elements.status.textContent = message;
@@ -122,6 +197,7 @@ function clearPreviousResults() {
   elements.welcome.hidden = true;
   currentWeather = null;
   currentLocation = null;
+  setDestinationClockUnavailable("Buscando una ubicación…");
 }
 
 function showLocationChoices(locations, requestId, controller) {
@@ -284,6 +360,7 @@ function renderWeather() {
 
 async function loadForecast(location, requestId, controller) {
   elements.locationPicker.hidden = true;
+  setDestinationClockUnavailable(`Consultando la previsión de ${formatLocationName(location)}…`);
   setBusy(true, "Cargando…");
   setStatus(`Consultando la previsión de ${formatLocationName(location)}…`, "loading");
 
@@ -296,7 +373,13 @@ async function loadForecast(location, requestId, controller) {
     currentLocation = location;
     currentWeather = weather;
     renderWeather();
-    setStatus(`Previsión actualizada para ${formatLocationName(location)}.`, "success");
+    activateDestinationClock(location, weather.timeZone);
+    setStatus(
+      weather.timeZone
+        ? `Previsión actualizada para ${formatLocationName(location)}.`
+        : `Previsión actualizada para ${formatLocationName(location)}, pero la hora de destino no está disponible.`,
+      weather.timeZone ? "success" : "info",
+    );
     window.setTimeout(() => {
       if (requestId === activeRequestId && elements.status.dataset.kind === "success") {
         setStatus("");
@@ -306,6 +389,7 @@ async function loadForecast(location, requestId, controller) {
     if (!isCurrentRequest(requestId, controller)) {
       return;
     }
+    setDestinationClockUnavailable("No se pudo obtener la hora de destino. Prueba otra vez.");
     displayError(error, "No se pudo cargar la previsión.");
   } finally {
     if (requestId === activeRequestId) {
@@ -325,6 +409,7 @@ async function handleSearch(event) {
 
   const cityName = elements.input.value.trim();
   if (cityName.length < 2) {
+    setDestinationClockUnavailable("Escribe al menos dos caracteres para buscar una ubicación.");
     setBusy(false);
     setStatus("Escribe al menos dos caracteres para buscar una ciudad.", "error");
     elements.input.focus();
@@ -341,11 +426,13 @@ async function handleSearch(event) {
     }
 
     if (locations.length === 0) {
+      setDestinationClockUnavailable("No hay una ubicación seleccionada. Prueba otra búsqueda.");
       setStatus(`No encontramos ubicaciones para «${cityName}». Prueba a añadir el país, por ejemplo: «Madrid, España».`, "error");
       return;
     }
 
     if (locations.length > 1) {
+      setDestinationClockUnavailable("Elige una ubicación para consultar su hora.");
       showLocationChoices(locations, requestId, controller);
       setStatus(`Encontramos ${locations.length} ubicaciones. Elige la correcta para consultar su previsión.`, "info");
       return;
@@ -356,6 +443,7 @@ async function handleSearch(event) {
     if (!isCurrentRequest(requestId, controller)) {
       return;
     }
+    setDestinationClockUnavailable("No se pudo obtener la hora de destino. Prueba otra vez.");
     displayError(error, "No se pudo buscar la ciudad.");
   } finally {
     if (requestId === activeRequestId) {
@@ -363,6 +451,10 @@ async function handleSearch(event) {
     }
   }
 }
+
+setDestinationClockUnavailable("Busca una ubicación para ver su hora.");
+updateClocks();
+window.setInterval(() => updateClocks(new Date()), 1_000);
 
 elements.form.addEventListener("submit", (event) => {
   void handleSearch(event);

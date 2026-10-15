@@ -422,6 +422,163 @@ input:focus-visible,
   font-size: 1.15rem;
 }
 
+.clocks-panel {
+  margin: 0.65rem 0 1.45rem;
+  padding: 1.2rem;
+  border: 1px solid #e2eae5;
+  border-radius: 22px;
+  background:
+    radial-gradient(ellipse at 90% 0%, rgba(233, 242, 234, 0.68), transparent 20rem),
+    rgba(255, 255, 255, 0.8);
+  box-shadow: 0 12px 34px rgba(48, 68, 62, 0.045);
+}
+
+.clocks-panel__heading {
+  margin: 0 0 1rem 0.15rem;
+}
+
+.clocks-panel__heading h2 {
+  margin: 0.3rem 0 0;
+  color: #2e4041;
+  font-size: 1.18rem;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+}
+
+.clocks-panel__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.clock-card {
+  display: flex;
+  min-width: 0;
+  min-height: 250px;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem 0.8rem 0.9rem;
+  border: 1px solid rgba(210, 224, 216, 0.85);
+  border-radius: 18px;
+  background: linear-gradient(145deg, rgba(250, 252, 248, 0.98), rgba(242, 248, 243, 0.78));
+  text-align: center;
+}
+
+.clock-card__title {
+  display: flex;
+  min-height: 2.5em;
+  align-items: center;
+  justify-content: center;
+  margin: 0 0 0.55rem;
+  color: #354e4c;
+  font-size: 0.92rem;
+  font-weight: 680;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.clock-face {
+  position: relative;
+  width: clamp(132px, 17vw, 166px);
+  aspect-ratio: 1;
+  flex: 0 0 auto;
+  overflow: hidden;
+  border: 5px solid #f8fbf6;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 50%, #6c8984 0 2px, transparent 2.8px),
+    radial-gradient(circle at 50% 50%, #fffef9, #eaf2eb);
+  box-shadow:
+    0 4px 15px rgba(45, 74, 67, 0.13),
+    inset 0 0 0 1px rgba(85, 119, 111, 0.18);
+}
+
+.clock-face__markers {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  color: #5c7b74;
+}
+
+.clock-face__hand {
+  position: absolute;
+  z-index: 1;
+  bottom: 50%;
+  left: 50%;
+  border-radius: 999px;
+  transform-origin: 50% 100%;
+}
+
+.clock-face__hand--hour {
+  width: 5px;
+  height: 28%;
+  margin-left: -2.5px;
+  background: #355f5d;
+}
+
+.clock-face__hand--minute {
+  width: 3px;
+  height: 38%;
+  margin-left: -1.5px;
+  background: #4f7773;
+}
+
+.clock-face__hand--second {
+  z-index: 2;
+  width: 2px;
+  height: 43%;
+  margin-left: -1px;
+  background: #b76a4c;
+}
+
+.clock-face__pin {
+  position: absolute;
+  z-index: 3;
+  top: 50%;
+  left: 50%;
+  width: 9px;
+  aspect-ratio: 1;
+  border: 2px solid #fffdf7;
+  border-radius: 50%;
+  background: #355f5d;
+  transform: translate(-50%, -50%);
+}
+
+.clock-face--pending {
+  background:
+    radial-gradient(circle at 50% 50%, #91a49e 0 2px, transparent 2.8px),
+    radial-gradient(circle at 50% 50%, #f4f7f2, #e4ece6);
+  box-shadow: inset 0 0 0 1px rgba(85, 119, 111, 0.12);
+}
+
+.clock-face--pending .clock-face__markers {
+  opacity: 0.55;
+}
+
+.clock-face--pending .clock-face__hand {
+  opacity: 0.45;
+}
+
+.clock-card__reading {
+  margin: 0.72rem 0 0;
+  color: #304b49;
+  font-size: clamp(1rem, 2vw, 1.16rem);
+  font-weight: 690;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.025em;
+}
+
+.clock-card__status {
+  max-width: 30ch;
+  min-height: 2.7em;
+  margin: 0.72rem 0 0;
+  color: #566d68;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
 .welcome-panel {
   display: flex;
   min-height: 148px;
@@ -998,6 +1155,23 @@ input:focus-visible,
     padding-top: 3.2rem;
   }
 
+  .clocks-panel {
+    padding: 1rem;
+  }
+
+  .clocks-panel__grid {
+    gap: 0.7rem;
+  }
+
+  .clock-card {
+    min-height: 230px;
+    padding: 0.85rem 0.55rem 0.75rem;
+  }
+
+  .clock-face {
+    width: clamp(118px, 20vw, 150px);
+  }
+
   .weather-card {
     min-height: 0;
     padding: 1.6rem 1rem 1rem;
@@ -1059,6 +1233,48 @@ input:focus-visible,
   .search-intro h1 {
     font-size: clamp(2.2rem, 10vw, 3.25rem);
     letter-spacing: -0.07em;
+  }
+
+  .clocks-panel {
+    padding: 0.8rem;
+    border-radius: 19px;
+  }
+
+  .clocks-panel__heading {
+    margin-left: 0.1rem;
+  }
+
+  .clocks-panel__heading h2 {
+    font-size: 1.05rem;
+  }
+
+  .clocks-panel__grid {
+    gap: 0.55rem;
+  }
+
+  .clock-card {
+    min-height: 210px;
+    padding: 0.7rem 0.35rem;
+    border-radius: 15px;
+  }
+
+  .clock-card__title {
+    font-size: 0.82rem;
+  }
+
+  .clock-face {
+    width: clamp(106px, 27vw, 138px);
+    border-width: 4px;
+  }
+
+  .clock-card__reading {
+    margin-top: 0.6rem;
+    font-size: 0.92rem;
+  }
+
+  .clock-card__status {
+    margin-top: 0.6rem;
+    font-size: 0.71rem;
   }
 
   .wide-break {
@@ -1282,6 +1498,21 @@ input:focus-visible,
 
   .site-footer {
     padding: 1rem 0 1.3rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .clocks-panel__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .clock-card {
+    min-height: 0;
+    padding: 0.85rem 0.6rem;
+  }
+
+  .clock-face {
+    width: 136px;
   }
 }
 

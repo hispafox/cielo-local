@@ -4,19 +4,20 @@ Documento de análisis para definir un MVP de previsión meteorológica web, est
 
 ## 1. Objetivo
 
-Crear una página adaptable a móvil y escritorio en la que una persona escriba el nombre de una ciudad, pulse **Enter** o **Buscar** y consulte el tiempo actual y la previsión de los próximos siete días.
+Crear una página adaptable a móvil y escritorio en la que una persona escriba el nombre de una ciudad, pulse **Enter** o **Buscar** y consulte el tiempo actual y la previsión de los próximos siete días. Mostrar también un reloj analógico local y otro de la ubicación consultada, ambos con lectura horaria textual.
 
 La propuesta usa HTML semántico, JavaScript nativo y las API públicas de Open-Meteo. No necesita servidor, base de datos, cuenta de usuario ni una clave API para el uso gratuito no comercial descrito por el proveedor.
 
 ## 2. Usuario y recorrido principal
 
-**Historia de usuario:** Como persona que quiere consultar el tiempo, quiero buscar una ciudad y ver de forma clara las condiciones actuales y la previsión semanal.
+**Historia de usuario:** Como persona que quiere consultar el tiempo, quiero buscar una ciudad y ver de forma clara las condiciones actuales, la previsión semanal y la hora tanto de mi navegador como del destino.
 
-1. La página presenta un campo etiquetado, un botón de búsqueda y una indicación de formato, por ejemplo, `Madrid` o `Madrid, España`.
+1. La página presenta un campo etiquetado, un botón de búsqueda y una indicación de formato, por ejemplo, `Madrid` o `Madrid, España`; el reloj local se muestra desde el inicio sin pedir permisos de ubicación.
 2. La búsqueda se inicia al enviar el formulario, tanto con Enter como con el botón.
 3. La aplicación busca coincidencias geográficas. Si hay más de una ubicación plausible, permite elegir mostrando ciudad, región y país; no selecciona silenciosamente una ciudad ambigua.
-4. Con las coordenadas de la ubicación elegida, solicita la previsión y muestra el estado actual y una tarjeta por día.
-5. Durante la operación muestra carga; si no hay coincidencias o falla un servicio, ofrece un mensaje comprensible y la posibilidad de volver a intentarlo.
+4. Con las coordenadas de la ubicación elegida, solicita la previsión, usa la zona IANA devuelta para el reloj de destino y muestra el estado actual y una tarjeta por día.
+5. Durante la operación, la ambigüedad o un error, el reloj de destino muestra un estado explícito sin conservar la hora previa; el reloj local continúa.
+6. Durante la operación muestra carga; si no hay coincidencias o falla un servicio, ofrece un mensaje comprensible y la posibilidad de volver a intentarlo.
 
 ## 3. Alcance del MVP
 
@@ -28,6 +29,7 @@ La propuesta usa HTML semántico, JavaScript nativo y las API públicas de Open-
 - Condiciones actuales: temperatura, sensación térmica, humedad, viento y código/ descripción del tiempo.
 - Previsión diaria de siete días: icono o símbolo, descripción, máximas y mínimas y probabilidad máxima de precipitación cuando esté disponible.
 - Celsius por defecto, con un conmutador Celsius/Fahrenheit que actualiza todas las temperaturas de la vista; fechas presentadas en español.
+- Dos relojes analógicos redondos: hora local del navegador y hora de la ubicación seleccionada a partir de la zona IANA validada de Forecast. Las agujas y la lectura textual avanzan cada segundo y `Intl` aplica las transiciones estacionales.
 - Una tarjeta visual de previsión inspirada en la referencia compartida, sin valores de ejemplo fijos ni datos meteorológicos inventados.
 - Estados de carga, resultados, búsqueda sin coincidencias y errores de red/API.
 - Interfaz responsive y operable con teclado.
@@ -78,6 +80,7 @@ GET https://api.open-meteo.com/v1/forecast
 
 - Presentar las unidades que devuelve la API (`current_units` y `daily_units`) junto con los valores.
 - Formatear fechas con `Intl.DateTimeFormat` y el locale `es-ES`.
+- Solicitar `timezone=auto` y conservar `timezone` solo si el identificador que devuelve Forecast es aceptado por `Intl` como zona horaria; usar ese identificador IANA para la lectura del destino. No inferir zonas de nombres u offsets ni hacer una petición adicional. Si falta o no es válido, la previsión meteorológica que ya pasó su validación conserva su comportamiento y el reloj de destino indica que no está disponible.
 - Traducir los códigos `weather_code` según la tabla WMO enlazada en la documentación del proveedor; mantener esa correspondencia en un único lugar del código.
 - Conservar los valores recibidos en Celsius y convertirlos solo al presentarlos en Fahrenheit (`°F = °C × 9/5 + 32`). Aplicar la conversión de forma coherente a temperatura actual, sensación térmica y máximas/mínimas; el cambio de unidad no debe generar otra llamada a la API.
 - Comprobar respuestas HTTP y estructura de datos antes de renderizar. No presentar datos de una búsqueda anterior como si pertenecieran a la nueva.
@@ -98,14 +101,20 @@ flowchart LR
     subgraph Navegador
         UI[Interfaz HTML accesible]
         APP[JavaScript<br/>validación, flujo y renderizado]
+        CLOCK[Utilidades horarias<br/>Intl y geometría de agujas]
+        TICK[Un ciclo de reloj<br/>cada segundo]
         UI -->|Enviar formulario: Enter o botón| APP
         APP -->|Renderizar estado, ubicación y previsión| UI
+        TICK -->|Mismo instante para ambos relojes| CLOCK
+        CLOCK -->|Lectura textual y agujas| UI
+        BROWSER[T zona local del navegador] --> CLOCK
     end
 
     APP -->|GET nombre, idioma y límite de resultados| GEO[Open-Meteo Geocoding API]
     GEO -->|Coincidencias con ciudad, país y coordenadas| APP
     APP -->|GET latitud, longitud, unidades y horizonte de 7 días| WX[Open-Meteo Forecast API]
-    WX -->|JSON con condiciones actuales y previsión diaria| APP
+    WX -->|JSON con condiciones, previsión diaria y timezone| APP
+    APP -->|Zona IANA solo de la respuesta vigente| CLOCK
 
     APP -.->|Solo si se elige un proveedor que requiere clave| BFF[Backend o función serverless opcional]
     BFF -.-> ALT[API meteorológica alternativa]
@@ -136,6 +145,7 @@ Las alternativas son puntos de integración posibles, no dependencias del MVP. S
     app.js
     weather-api.js
     weather-codes.js
+    time-utils.js
     weather-utils.js
   ```
 
@@ -143,6 +153,7 @@ Las alternativas son puntos de integración posibles, no dependencias del MVP. S
 - `app.js`: envío del formulario, selección de ubicación, estados de carga/error y coordinación del renderizado.
 - `weather-api.js`: construcción de peticiones y validación de respuestas de Open-Meteo.
 - `weather-codes.js`: traducción de códigos WMO a descripciones e iconos.
+- `time-utils.js`: validación de zonas IANA y formato/ángulos horarios puros a partir de un instante explícito.
 - `weather-utils.js`: conversión Celsius/Fahrenheit y formato de fechas, en funciones comprobables sin llamadas de red.
 - `styles.css`: layout responsive, estados visibles y jerarquía tipográfica.
 - Tailwind no es necesario para el MVP. Para reducir dependencias y mantener el sitio estático, se recomienda CSS local; si el equipo prefiere Tailwind, usarlo compilado en el proceso de build, no depender de su CDN para una publicación de producción.
@@ -170,6 +181,8 @@ Tomar esta descripción como referencia de composición y ambiente, sin copiar m
 - Anunciar cambios de estado con una región `aria-live="polite"` y conservar el foco en el flujo de búsqueda.
 - Permitir el uso completo con teclado y mostrar foco visible.
 - Mostrar claramente la unidad, la ubicación seleccionada y el país para evitar confusiones entre ciudades homónimas.
+- Nombrar las dos esferas «Hora local» y «Hora en {ubicación}» cuando exista una ubicación vigente; acompañar cada dial decorativo de una lectura textual accesible. La lectura de segundo a segundo no debe estar dentro de una región `aria-live`.
+- Mantener un mensaje visible para el reloj de destino hasta recibir una previsión vigente con zona válida. Búsquedas nuevas, ambigüedad y errores eliminan la zona y la lectura anteriores; no borrar ni detener el reloj local.
 - Hacer que el conmutador `°C`/`°F` sea accesible por teclado y anuncie su estado; cambiar la unidad de todas las temperaturas a la vez.
 - Dar feedback inmediato durante la carga; impedir envíos duplicados mientras una petición esté activa y permitir reintentar tras un error.
 
@@ -193,13 +206,16 @@ Tomar esta descripción como referencia de composición y ambiente, sin copiar m
 7. La interfaz funciona en móvil y escritorio; la banda de siete días sigue siendo legible y accesible con teclado.
 8. La fuente y atribución requeridas son visibles, y la aplicación no expone claves secretas.
 9. El pie de página muestra la versión actual de la aplicación.
+10. Se ven ambos relojes con nombre y lectura textual; el local usa el reloj/zona del navegador y el de destino la zona IANA de la respuesta Forecast vigente, con segundos y cambios estacionales.
+11. Una búsqueda nueva, ambigua, sin resultados o fallida no deja visible una lectura/zona de destino anterior; la hora local permanece activa. La interfaz no usa geolocalización ni permisos.
 
 ## 10. Verificación propuesta
 
 - Comprobar manualmente una ciudad conocida, una búsqueda ambigua, una ciudad inexistente, una búsqueda de dos caracteres y una interrupción de red.
 - Verificar en el navegador que se realizan las dos peticiones esperadas y que la respuesta de previsión corresponde a las coordenadas elegidas.
 - Probar Enter, botón, foco visible, mensajes anunciados, estados de carga/error y tamaños de pantalla móvil/escritorio.
-- Las pruebas automatizadas cubren la conversión de temperaturas, el formateo de fechas, los códigos WMO y el contrato de las API con respuestas simuladas; no dependen de llamadas a servicios reales.
+- Verificar que al activar el reloj de destino se utiliza exclusivamente `timezone` de Forecast para la búsqueda vigente y que no se añade una petición; la hora local no debe invocar geolocalización ni pedir permisos.
+- Las pruebas automatizadas cubren la conversión de temperaturas, el formateo de fechas y horas por zona IANA, un cambio estacional, los códigos WMO y el contrato de las API con respuestas simuladas; no dependen de llamadas a servicios reales.
 
 
 ## 11. Referencias oficiales

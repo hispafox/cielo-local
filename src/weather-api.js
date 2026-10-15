@@ -1,3 +1,5 @@
+import { isValidIanaTimeZone } from "./time-utils.js";
+
 const GEOCODING_URL = "https://geocoding-api.open-meteo.com/v1/search";
 const FORECAST_URL = "https://api.open-meteo.com/v1/forecast";
 const REQUEST_TIMEOUT_MS = 12_000;
@@ -209,6 +211,7 @@ export async function fetchForecast(location, signal) {
   });
 
   return {
+    timeZone: isValidIanaTimeZone(payload.timezone) ? payload.timezone : null,
     current: {
       time: current.time,
       temperatureC: requireNumber(current, "temperature_2m", "temperatura actual"),
