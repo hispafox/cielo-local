@@ -310,6 +310,45 @@ input:focus-visible,
   line-height: 1.5;
 }
 
+.recent-cities {
+  margin-top: 1rem;
+}
+
+.recent-cities__heading {
+  margin: 0 0 0.55rem;
+  color: #526964;
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+
+.recent-cities__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.recent-city {
+  min-height: 44px;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid #dce7e2;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.84);
+  color: #365b56;
+  cursor: pointer;
+  font-size: 0.84rem;
+  font-weight: 600;
+  line-height: 1.35;
+  transition: border-color 140ms ease, background 140ms ease;
+}
+
+.recent-city:hover {
+  border-color: #a9c7be;
+  background: #f8fbf8;
+}
+
 .app-status {
   margin: 0.25rem 0 1.1rem;
   padding: 0.85rem 1rem;

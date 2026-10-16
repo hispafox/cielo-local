@@ -2,6 +2,12 @@ import { fetchForecast, searchLocations } from "./weather-api.js";
 import { getWeatherInfo } from "./weather-codes.js";
 import { getClockReading } from "./time-utils.js";
 import { formatDayLabel, formatTemperature } from "./weather-utils.js";
+import {
+  addRecentCity,
+  readRecentCities,
+  RecentCitiesDataError,
+  RecentCitiesStorageError,
+} from "./recent-cities.js";
 
 const iconMarkup = {
   sun: `
@@ -43,6 +49,8 @@ const elements = {
   buttonLabel: document.querySelector("#search-button-label"),
   spinner: document.querySelector("#search-spinner"),
   status: document.querySelector("#app-status"),
+  recentCities: document.querySelector("#recent-cities"),
+  recentCitiesList: document.querySelector("#recent-cities-list"),
   locationPicker: document.querySelector("#location-picker"),
   locationList: document.querySelector("#location-list"),
   welcome: document.querySelector("#welcome-panel"),
@@ -89,6 +97,19 @@ let currentLocation = null;
 let activeController = null;
 let activeRequestId = 0;
 let destinationTimeZone = null;
+let recentCities = [];
+let recentCitiesWarning = null;
+try {
+  recentCities = readRecentCities();
+} catch (error) {
+  if (error instanceof RecentCitiesStorageError) {
+    recentCitiesWarning = "No se pudo leer el historial local. Las búsquedas meteorológicas siguen disponibles.";
+  } else if (error instanceof RecentCitiesDataError) {
+    recentCitiesWarning = "El historial guardado está dañado o no tiene un formato válido. No se mostraron sus datos; puedes seguir buscando.";
+  } else {
+    throw error;
+  }
+}
 
 function renderClock(reading, timeElement, hands) {
   timeElement.textContent = reading.formattedTime;
@@ -185,6 +206,12 @@ function formatLocationName(location) {
     .join(", ");
 }
 
+function formatLocationQuery(location) {
+  return [location.name, location.admin1, location.country]
+    .filter((part, index, all) => part && all.indexOf(part) === index)
+    .join(", ");
+}
+
 function formatLocationDetail(location) {
   const parts = [location.admin1, location.country]
     .filter((part, index, all) => part && part !== location.name && all.indexOf(part) === index);
@@ -234,6 +261,25 @@ function showLocationChoices(locations, requestId, controller) {
   }
 
   elements.locationPicker.hidden = false;
+}
+
+function renderRecentCities() {
+  elements.recentCitiesList.replaceChildren();
+  for (const city of recentCities) {
+    const item = document.createElement("li");
+    const button = document.createElement("button");
+    button.className = "recent-city";
+    button.type = "button";
+    button.textContent = city.label;
+    button.setAttribute("aria-label", `Volver a consultar ${city.label}`);
+    button.addEventListener("click", () => {
+      elements.input.value = city.query;
+      elements.form.requestSubmit();
+    });
+    item.append(button);
+    elements.recentCitiesList.append(item);
+  }
+  elements.recentCities.hidden = recentCities.length === 0;
 }
 
 function displayError(error, task) {
@@ -442,13 +488,27 @@ async function loadForecast(location, requestId, controller) {
 
     currentLocation = location;
     currentWeather = weather;
+    try {
+      recentCities = addRecentCity(recentCities, {
+        label: formatLocationName(location),
+        query: formatLocationQuery(location),
+      });
+      recentCitiesWarning = null;
+    } catch (error) {
+      if (!(error instanceof RecentCitiesStorageError)) {
+        throw error;
+      }
+      recentCitiesWarning = "No se pudo guardar la ciudad en el historial local. La previsión está disponible, pero no se conservará al recargar.";
+    }
+    renderRecentCities();
     renderWeather();
     activateDestinationClock(location, weather.timeZone);
+    const forecastMessage = weather.timeZone
+      ? `Previsión actualizada para ${formatLocationName(location)}.`
+      : `Previsión actualizada para ${formatLocationName(location)}, pero la hora de destino no está disponible.`;
     setStatus(
-      weather.timeZone
-        ? `Previsión actualizada para ${formatLocationName(location)}.`
-        : `Previsión actualizada para ${formatLocationName(location)}, pero la hora de destino no está disponible.`,
-      weather.timeZone ? "success" : "info",
+      recentCitiesWarning ? `${forecastMessage} ${recentCitiesWarning}` : forecastMessage,
+      recentCitiesWarning ? "error" : weather.timeZone ? "success" : "info",
     );
     window.setTimeout(() => {
       if (requestId === activeRequestId && elements.status.dataset.kind === "success") {
@@ -523,6 +583,10 @@ async function handleSearch(event) {
 }
 
 setDestinationClockUnavailable("Busca una ubicación para ver su hora.");
+renderRecentCities();
+if (recentCitiesWarning) {
+  setStatus(recentCitiesWarning, "error");
+}
 updateClocks();
 window.setInterval(() => updateClocks(new Date()), 1_000);
 

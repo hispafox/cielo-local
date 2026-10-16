@@ -34,7 +34,7 @@ La aplicación consulta directamente dos servicios de Open-Meteo:
 
 El MVP no requiere clave API ni backend. La API gratuita de Open-Meteo está destinada a uso no comercial, tiene un límite publicado de 10.000 llamadas al día y no ofrece garantía de disponibilidad. Los datos requieren atribución bajo la licencia [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); la aplicación incluye el crédito. Revisa las [condiciones y planes actuales](https://open-meteo.com/en/pricing) antes de publicar. Para uso comercial o un proveedor que exija una clave, utiliza el plan/proveedor adecuado y guarda cualquier secreto en un backend, nunca en el navegador.
 
-Al buscar, el nombre de la ciudad se envía al servicio de geocodificación; después se consultan las coordenadas elegidas al servicio meteorológico. La hora de destino usa `timezone` de esa misma respuesta Forecast, y el reloj local usa el huso horario del navegador. La aplicación no usa GPS, no solicita permisos de ubicación ni almacena búsquedas.
+Al buscar, el nombre de la ciudad se envía al servicio de geocodificación; después se consultan las coordenadas elegidas al servicio meteorológico. La hora de destino usa `timezone` de esa misma respuesta Forecast, y el reloj local usa el huso horario del navegador. La aplicación no usa GPS ni solicita permisos de ubicación. Guarda en el almacenamiento local del navegador los nombres y consultas de las ciudades cuya previsión se ha cargado correctamente, para mostrar el historial después de recargar. Ese historial no se envía ni se sincroniza con ningún servicio; al seleccionar una ciudad guardada, su consulta se vuelve a enviar a Geocoding mediante el flujo de búsqueda habitual. No se guardan datos de la previsión.
 
 ## Pruebas
 

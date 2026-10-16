@@ -36,10 +36,11 @@ La propuesta usa HTML semántico, JavaScript nativo y las API públicas de Open-
 - Interfaz responsive y operable con teclado.
 - Atribución visible a la fuente de datos.
 - Versión de la aplicación visible en el pie de página.
+- Historial local de las ciudades cuya previsión se ha consultado correctamente, guardado solo en el almacenamiento del navegador.
 
 ### Fuera del MVP
 
-- Cuentas, favoritos persistentes, base de datos o historial.
+- Cuentas, favoritos, sincronización del historial, almacenamiento remoto y base de datos.
 - Mapa, búsqueda automática por GPS, alertas o notificaciones.
 - Comparación entre modelos meteorológicos.
 - Backend propio, salvo que la elección futura de proveedor o sus condiciones lo hagan necesario.
